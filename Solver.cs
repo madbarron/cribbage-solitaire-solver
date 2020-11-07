@@ -7,11 +7,9 @@ namespace CribbageSolitaireSolver
 {
     class Solver
     {
-        private const int MAX_LEVELS = 10;
+        private const int MAX_LEVELS = 12;
 
         private Dictionary<GameState, GamePlan> bestScores = new Dictionary<GameState, GamePlan>();
-
-        //private Queue<GameMove> evaluationQueue = new List<GameMove>();
 
         GamePlan zeroPlan = new GamePlan { moves = new Stack<byte>(), score = 0, id = -1 };
 
@@ -67,6 +65,21 @@ namespace CribbageSolitaireSolver
             //return possibleScores[startingState];
         }
 
+        public List<byte> GetPossibleMoves(GameState state)
+        {
+            List<byte> possibleMoves = new List<byte>();
+
+            for (byte column = 0; column < 4; column++)
+            {
+                if (state.board[column].Count > 0 && SumStack(state.stack) + state.board[column].Peek() <= 31)
+                {
+                    possibleMoves.Add(column);
+                }
+            }
+
+            return possibleMoves;
+        }
+
         public GamePlan EvaluateState(GameState state, int levels)
         {
             if (levels > MAX_LEVELS)
@@ -83,23 +96,14 @@ namespace CribbageSolitaireSolver
             // There is still room in our stack
             // Try each possible move
             GamePlan bestMove = zeroPlan;
-            //bool possibleMoves = false;
-            List<byte> possibleMoves = new List<byte>();
 
-            for (byte column = 0; column < 4; column++)
-            {
-                if (state.board[column].Count > 0 && SumStack(state.stack) + state.board[column].Peek() <= 31)
-                {
-                    possibleMoves.Add(column);
-                }
-            }
+            List<byte> possibleMoves = GetPossibleMoves(state);
 
             // If no moves were possible, the stack must be cleared
             if (possibleMoves.Count == 0)
             {
-                //GameState clearStack = new GameState(state) { stack = new List<byte>() };
-                //return EvaluateState(clearStack, levels + 1);
                 state.stack.Clear();
+                possibleMoves = GetPossibleMoves(state);
             }
 
             foreach(byte column in possibleMoves)
@@ -115,11 +119,6 @@ namespace CribbageSolitaireSolver
                 // See if it is best so far
                 if (futurePlan.score + moveScore > bestMove.score)
                 {
-                    if (futurePlan.score > 0)
-                    { }
-                    if (futurePlan.score + moveScore > 2)
-                    {  }
-
                     // Write down what we did
                     GamePlan movePlan = new GamePlan(futurePlan);
                     movePlan.score += moveScore;
@@ -133,10 +132,6 @@ namespace CribbageSolitaireSolver
             // Save for later so we don't have to do this again
             bestScores[state] = bestMove;
 
-            if (bestMove.score > 2)
-            {
-
-            }
             return bestMove;
         }
 
@@ -182,17 +177,9 @@ namespace CribbageSolitaireSolver
             return card > 10 ? 10 : card;
         }
 
-        //public GamePlan EvaluateMove(GameMove move)
-        //{
-
-        //}
 
         public void DrawState(GameState state)
         {
-            //GameState copy = new GameState(state);
-
-            //copy.board[0].
-
             Console.WriteLine();
 
             for (int y = 0; y < 13; y++)
@@ -203,6 +190,7 @@ namespace CribbageSolitaireSolver
                 // Gap
                 Console.Write("  ");
 
+                // Columns
                 for (int column = 0; column < 4; column++)
                 {
                     Console.Write(state.board[column].Count > y ? GetCardName(state.board[column].ElementAt<byte>(y)).PadLeft(2) : "  ");
