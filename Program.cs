@@ -47,7 +47,9 @@ namespace CribbageSolitaireSolver
             Console.WriteLine("Hello World!");
 
             // Get starting state
-            GameState state = solver.GetStartingState();
+            //GameState state = solver.GetStartingState();
+            GameState state = solver.GetStateFromConsole();
+
             GamePlan plan = solver.EvaluateGame(state);
 
             Console.WriteLine(string.Format("{0} points will be scored.", plan.score));
@@ -63,19 +65,16 @@ namespace CribbageSolitaireSolver
                 if (solver.SumStack(state.stack) + solver.CardValue(card) > 31)
                 {
                     state.stack.Clear();
+                    Console.WriteLine("Clear.");
                 }
                 points += solver.ScoreMove(state.stack, card);
                 state.stack.Add(state.board[move].Pop());
 
                 //Console.Write(move);
-                solver.DrawState(state);
-                Console.WriteLine(String.Format("{0} points.", points));
-                Console.ReadKey();
+                //solver.DrawState(state);
+                Console.WriteLine(String.Format("Take the {0} from column {1}. {2} points.", solver.GetCardName(card), move + 1, points));
+                //Console.ReadKey();
             }
-            //foreach(byte b in plan.moves)
-            //{
-            //    Console.Write(b);
-            //}
         }
 
     }

@@ -8,10 +8,28 @@ namespace CribbageSolitaireSolver
     class Solver
     {
         private const int MAX_LEVELS = 12;
+        private const byte COLUMN_HEIGHT = 5;
 
         private Dictionary<GameState, GamePlan> bestScores = new Dictionary<GameState, GamePlan>();
 
         GamePlan zeroPlan = new GamePlan { moves = new Stack<byte>(), score = 0, id = -1 };
+
+        Dictionary<char, byte> inputMap = new Dictionary<char, byte>()
+        {
+            {'a', 1 },
+            {'2', 2 },
+            {'3', 3 },
+            {'4', 4 },
+            {'5', 5 },
+            {'6', 6 },
+            {'7', 7 },
+            {'8', 8 },
+            {'9', 9 },
+            {'1', 10 },
+            {'j', 11 },
+            {'q', 12 },
+            {'k', 13 }
+        };
 
         public GameState GetStartingState()
         {
@@ -45,6 +63,37 @@ namespace CribbageSolitaireSolver
             state.board[3].Push(4);
 
             state.stack = new List<byte>();
+
+            return state;
+        }
+
+        public GameState GetStateFromConsole()
+        {
+            GameState state = new GameState();
+
+            state.stack = new List<byte>();
+            state.board = new Stack<byte>[4]
+            {
+                new Stack<byte>(),
+                new Stack<byte>(),
+                new Stack<byte>(),
+                new Stack<byte>()
+            };
+
+            for (int i = 0; i < 4; i++)
+            {
+                Console.WriteLine(String.Format("Enter column {0} from top to bottom.", i + 1));
+
+                for(int j = 0; j < COLUMN_HEIGHT; j++)
+                {
+                    char input = Console.ReadKey().KeyChar;
+                    state.board[i].Push(inputMap[input]);
+                }
+
+                Console.WriteLine();
+            }
+
+            Console.WriteLine("OK, I'll think about it!");
 
             return state;
         }
@@ -154,6 +203,30 @@ namespace CribbageSolitaireSolver
             // If stack is now 31, 2 pts
             if (SumStack(stack) + CardValue(card) == 31)
             {
+                pts += 2;
+            }
+
+            // Set of 2, 3, or 4
+            if (stack.Count >= 1 && stack[stack.Count - 1] == card)
+            {
+                // Set of at least 2
+
+                if (stack.Count >= 2 && stack[stack.Count - 2] == card)
+                {
+                    // Set of at least 3
+
+                    if (stack.Count >= 3 && stack[stack.Count - 3] == card)
+                    {
+                        // Set of 4! Wow!!
+                        pts += 12;
+                    }
+                    else
+                    {
+                        // Set of 3
+                        pts += 6;
+                    }
+                }
+                // Set of 2
                 pts += 2;
             }
 
