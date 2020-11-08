@@ -31,7 +31,12 @@ namespace CribbageSolitaireSolver
             {'1', 10 },
             {'j', 11 },
             {'q', 12 },
-            {'k', 13 }
+            {'k', 13 },
+
+            // Home row shortcuts
+            {'s', 11 },
+            {'d', 12 },
+            {'f', 13 },
         };
 
         public GameState GetBenchmarkState()
