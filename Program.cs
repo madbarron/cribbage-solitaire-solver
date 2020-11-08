@@ -39,43 +39,47 @@ namespace CribbageSolitaireSolver
 
     class Program
     {
-
         static void Main(string[] args)
         {
             Solver solver = new Solver();
 
-            Console.WriteLine("Hello World!");
-
-            // Get starting state
-            //GameState state = solver.GetStartingState();
+            // Get starting state from keyboard
             GameState state = solver.GetStateFromConsole();
 
             GamePlan plan = solver.EvaluateGame(state);
 
-            Console.WriteLine(string.Format("{0} points will be scored.", plan.score));
+            GameState playState = state;
 
-            solver.DrawState(state);
-
-            short points = 0;
-
-            while (plan.moves.Count > 0)
+            while (plan.score > 0)
             {
-                byte move = plan.moves.Pop();
-                byte card = state.board[move].Peek();
-                if (solver.SumStack(state.stack) + solver.CardValue(card) > 31)
-                {
-                    state.stack.Clear();
-                    Console.WriteLine("Clear.");
-                }
-                points += solver.ScoreMove(state.stack, card);
-                state.stack.Add(state.board[move].Pop());
+                playState = new GameState(playState);
 
-                //Console.Write(move);
-                //solver.DrawState(state);
-                Console.WriteLine(String.Format("Take the {0} from column {1}. {2} points.", solver.GetCardName(card), move + 1, points));
-                //Console.ReadKey();
+                // Display plan to user
+                while (plan.moves.Count > 0)
+                {
+                    byte move = plan.moves.Pop();
+                    byte card = playState.board[move].Peek();
+                    if (solver.SumStack(playState.stack) + solver.CardValue(card) > 31)
+                    {
+                        playState.stack.Clear();
+                        Console.WriteLine("Clear.");
+                        break;
+                    }
+                    short points = solver.ScoreMove(playState.stack, card);
+                    playState.stack.Add(playState.board[move].Pop());
+
+                    Console.WriteLine(String.Format("Take the {0} from column {1}. {2} points.", solver.GetCardName(card), move + 1, points));
+                }
+
+                // Plan ahead
+                plan = solver.EvaluateGame(playState);
+                if (plan.score > 0)
+                {
+                    Console.WriteLine("...");
+                    Console.ReadLine();
+                    Console.Clear();
+                }                
             }
         }
-
     }
 }
