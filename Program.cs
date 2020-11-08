@@ -8,7 +8,7 @@ namespace CribbageSolitaireSolver
     class GameState: IEquatable<GameState>
     {
         public Stack<byte>[] board;
-        public List<byte> stack;
+        public List<byte> hand;
 
         private int hashCode = 0;
         public bool hashCodeSet = false;
@@ -26,9 +26,15 @@ namespace CribbageSolitaireSolver
                 this.board[i] = new Stack<byte>(copyFrom.board[i].Reverse<byte>());
             }
 
-            this.stack = new List<byte>(copyFrom.stack);
+            this.hand = new List<byte>(copyFrom.hand);
         }
 
+        /// <summary>
+        /// This assumes that the two gamestates are for the same game.
+        /// Game states for different board layouts could easily produce false positives.
+        /// </summary>
+        /// <param name="other"></param>
+        /// <returns></returns>
         public bool Equals([AllowNull] GameState other)
         {
             if (other == null)
@@ -43,14 +49,14 @@ namespace CribbageSolitaireSolver
             }
 
             // Compare stacks
-            if (stack.Count != other.stack.Count)
+            if (hand.Count != other.hand.Count)
             {
                 return false;
             }
 
-            for (byte i = 0; i < stack.Count; i++)
+            for (byte i = 0; i < hand.Count; i++)
             {
-                if (stack[i] != other.stack[i])
+                if (hand[i] != other.hand[i])
                 {
                     return false;
                 }
@@ -63,14 +69,6 @@ namespace CribbageSolitaireSolver
                 {
                     return false;
                 }
-
-                for (byte i = 0; i < board[col].Count; i++)
-                {
-                    if (board[col].ElementAt(i) != other.board[col].ElementAt(i))
-                    {
-                        return false;
-                    }
-                }
             }
 
             return true;
@@ -78,7 +76,7 @@ namespace CribbageSolitaireSolver
 
         public void SetHashCode()
         {
-            hashCode = stack.Count() + board[0].Count * 10 + board[1].Count * 100 + board[2].Count * 1000 - board[3].Count * 10000;
+            hashCode = hand.Count() + board[0].Count * 8 + board[1].Count * 8 * 13 + board[2].Count * 8 * 13 * 13 - board[3].Count * 8 * 13 * 13 * 13;
             hashCodeSet = true;
         }
 
@@ -134,14 +132,14 @@ namespace CribbageSolitaireSolver
                 {
                     byte move = plan.moves.Pop();
                     byte card = playState.board[move].Peek();
-                    if (solver.SumStack(playState.stack) + solver.CardValue(card) > 31)
+                    if (solver.SumStack(playState.hand) + solver.CardValue(card) > 31)
                     {
-                        playState.stack.Clear();
+                        playState.hand.Clear();
                         Console.WriteLine("Clear.");
                         break;
                     }
-                    short points = solver.ScoreMove(playState.stack, card);
-                    playState.stack.Add(playState.board[move].Pop());
+                    short points = solver.ScoreMove(playState.hand, card);
+                    playState.hand.Add(playState.board[move].Pop());
 
                     Console.WriteLine(String.Format("Take the {0} from column {1}. {2} points.", solver.GetCardName(card), move + 1, points));
                 }
