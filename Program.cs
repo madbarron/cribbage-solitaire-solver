@@ -44,7 +44,8 @@ namespace CribbageSolitaireSolver
             Solver solver = new Solver();
 
             // Get starting state from keyboard
-            GameState state = solver.GetStateFromConsole();
+            //GameState state = solver.GetStateFromConsole();
+            GameState state = solver.GetBenchmarkState();
 
             GamePlan plan = solver.EvaluateGame(state);
 

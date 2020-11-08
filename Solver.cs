@@ -31,7 +31,7 @@ namespace CribbageSolitaireSolver
             {'k', 13 }
         };
 
-        public GameState GetStartingState()
+        public GameState GetBenchmarkState()
         {
             GameState state = new GameState();
             state.board = new Stack<byte>[4]
@@ -61,6 +61,35 @@ namespace CribbageSolitaireSolver
             state.board[3].Push(7);
             state.board[3].Push(6);
             state.board[3].Push(4);
+
+            state.stack = new List<byte>();
+
+            return state;
+        }
+
+        /// <summary>
+        /// Reproduces a bug that is now fixed. Output should be 10, 10, A, K; Q, Q
+        /// </summary>
+        /// <returns></returns>
+        public GameState GetTestState()
+        {
+            GameState state = new GameState();
+            state.board = new Stack<byte>[4]
+            {
+                new Stack<byte>(),
+                new Stack<byte>(),
+                new Stack<byte>(),
+                new Stack<byte>()
+            };
+
+            state.board[0].Push(13);
+            state.board[0].Push(1);
+            state.board[0].Push(10);
+
+            state.board[1].Push(10);
+
+            state.board[3].Push(12);
+            state.board[3].Push(12);
 
             state.stack = new List<byte>();
 
@@ -120,7 +149,7 @@ namespace CribbageSolitaireSolver
 
             for (byte column = 0; column < 4; column++)
             {
-                if (state.board[column].Count > 0 && SumStack(state.stack) + state.board[column].Peek() <= 31)
+                if (state.board[column].Count > 0 && SumStack(state.stack) + CardValue(state.board[column].Peek()) <= 31)
                 {
                     possibleMoves.Add(column);
                 }
