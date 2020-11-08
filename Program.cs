@@ -1,13 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
 namespace CribbageSolitaireSolver
 {
-    struct GameState
+    class GameState: IEquatable<GameState>
     {
         public Stack<byte>[] board;
         public List<byte> stack;
+
+        private int hashCode = 0;
+        public bool hashCodeSet = false;
+
+        public GameState()
+        {
+
+        }
 
         public GameState(GameState copyFrom)
         {
@@ -18,6 +27,68 @@ namespace CribbageSolitaireSolver
             }
 
             this.stack = new List<byte>(copyFrom.stack);
+        }
+
+        public bool Equals([AllowNull] GameState other)
+        {
+            if (other == null)
+            {
+                return false;
+            }
+
+            // Try quick judgement
+            if (other.GetHashCode() != GetHashCode())
+            {
+                return false;
+            }
+
+            // Compare stacks
+            if (stack.Count != other.stack.Count)
+            {
+                return false;
+            }
+
+            for (byte i = 0; i < stack.Count; i++)
+            {
+                if (stack[i] != other.stack[i])
+                {
+                    return false;
+                }
+            }
+
+            // Compare boards
+            for (byte col = 0; col < 4; col++)
+            {
+                if (board[col].Count != other.board[col].Count)
+                {
+                    return false;
+                }
+
+                for (byte i = 0; i < board[col].Count; i++)
+                {
+                    if (board[col].ElementAt(i) != other.board[col].ElementAt(i))
+                    {
+                        return false;
+                    }
+                }
+            }
+
+            return true;
+        }
+
+        public void SetHashCode()
+        {
+            hashCode = stack.Count() + board[0].Count * 10 + board[1].Count * 100 + board[2].Count * 1000 - board[3].Count * 10000;
+            hashCodeSet = true;
+        }
+
+        public override int GetHashCode()
+        {
+            if (!hashCodeSet)
+            {
+                SetHashCode();
+            }
+            return hashCode;
         }
     }
 
@@ -46,8 +117,11 @@ namespace CribbageSolitaireSolver
             // Get starting state from keyboard
             //GameState state = solver.GetStateFromConsole();
             GameState state = solver.GetBenchmarkState();
+            //GameState state = solver.GetTestState();
 
             GamePlan plan = solver.EvaluateGame(state);
+
+            Console.WriteLine(String.Format("Cache hit: {0} / {1} = {2}", solver.cacheHit, solver.cacheHit + solver.cacheMiss, solver.CacheHitRatio));
 
             GameState playState = state;
 

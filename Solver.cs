@@ -1,16 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace CribbageSolitaireSolver
 {
     class Solver
     {
-        private const int MAX_LEVELS = 11;
+        private const int MAX_LEVELS = 24;
         private const byte COLUMN_HEIGHT = 13;
 
         private Dictionary<GameState, GamePlan> bestScores = new Dictionary<GameState, GamePlan>();
+        public long cacheHit = 0;
+        public long cacheMiss = 0;
+
+        public float CacheHitRatio { get { return (float)cacheHit / (cacheHit + cacheMiss); } }
 
         GamePlan zeroPlan = new GamePlan { moves = new Stack<byte>(), score = 0, id = -1 };
 
@@ -46,21 +49,37 @@ namespace CribbageSolitaireSolver
             state.board[0].Push(2);
             state.board[0].Push(3);
             state.board[0].Push(4);
+            state.board[0].Push(5);
+            state.board[0].Push(4);
+            state.board[0].Push(9);
+            state.board[0].Push(11);
 
             state.board[1].Push(10);
             state.board[1].Push(8);
             state.board[1].Push(12);
             state.board[1].Push(13);
+            state.board[1].Push(6);
+            state.board[1].Push(4);
+            state.board[1].Push(10);
+            state.board[1].Push(1);
 
             state.board[2].Push(9);
             state.board[2].Push(2);
             state.board[2].Push(4);
             state.board[2].Push(4);
+            state.board[2].Push(6);
+            state.board[2].Push(3);
+            state.board[2].Push(1);
+            state.board[2].Push(12);
 
             state.board[3].Push(4);
             state.board[3].Push(7);
             state.board[3].Push(6);
             state.board[3].Push(4);
+            state.board[3].Push(13);
+            state.board[3].Push(11);
+            state.board[3].Push(8);
+            state.board[3].Push(7);
 
             state.stack = new List<byte>();
 
@@ -174,7 +193,12 @@ namespace CribbageSolitaireSolver
             // Check for memoization
             if (bestScores.ContainsKey(state))
             {
+                cacheHit++;
                 return bestScores[state];
+            }
+            else
+            {
+                cacheMiss++;
             }
 
             // There is still room in our stack
