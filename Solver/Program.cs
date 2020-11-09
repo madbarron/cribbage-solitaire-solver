@@ -48,12 +48,12 @@ namespace CribbageSolitaireSolver
                     byte card = LongStack.Peek(playState.board[move]);
                     if (solver.SumHand(playState.hand) + solver.CardValue(card) > 31)
                     {
-                        playState.hand.Clear();
+                        playState.hand = 0;
                         Console.WriteLine("Clear.");
                         break;
                     }
                     byte points = solver.ScoreMove(playState.hand, card);
-                    playState.hand.Add(LongStack.Peek(playState.board[move]));
+                    playState.hand = LongStack.Push(playState.hand, LongStack.Peek(playState.board[move]));
                     playState.board[move] = LongStack.Pop(playState.board[move]);
 
                     Console.WriteLine(String.Format("Take the {0} from column {1}. {2} points.", solver.GetCardName(card), move + 1, points));

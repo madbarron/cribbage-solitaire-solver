@@ -17,16 +17,14 @@ namespace CribbageSolitaireSolver
         // 348
         public ulong[] board;
 
-        public List<byte> hand;
-        public ulong handBinary;
+        // Hand also uses the same mechanism as board for storage.
+        public ulong hand = 0;
 
         private int hashCode = 0;
         public bool hashCodeSet = false;
 
         public GameState()
-        {
-
-        }
+        { }
 
         public GameState(GameState copyFrom)
         {
@@ -36,7 +34,7 @@ namespace CribbageSolitaireSolver
                 this.board[i] = copyFrom.board[i];
             }
 
-            this.hand = new List<byte>(copyFrom.hand);
+            this.hand = copyFrom.hand;
         }
 
         /// <summary>
@@ -56,32 +54,15 @@ namespace CribbageSolitaireSolver
                 return false;
             }
 
-            // Compare the first 16 cards. (only 13 cards per hand are possible given a standard deck)
-            return handBinary == other.handBinary;
+            return hand == other.hand;
         }
 
         public void SetHashCode()
         {
             // With a standard deck, the hand can hold up to 13 cards (A A A A 2 2 2 2 3 3 3 3 4)
             // Once the game is dealt, each column has 14 possible states (0-13 cards)
-            hashCode = hand.Count() + LongStack.Count(board[0]) * 14 + LongStack.Count(board[1]) * 14 * 14 + LongStack.Count(board[2]) * 14 * 14 * 14 - LongStack.Count(board[3]) * 14 * 14 * 14 * 14;
-            SetHandBinary();
+            hashCode = LongStack.Count(hand) + LongStack.Count(board[0]) * 14 + LongStack.Count(board[1]) * 14 * 14 + LongStack.Count(board[2]) * 14 * 14 * 14 - LongStack.Count(board[3]) * 14 * 14 * 14 * 14;
             hashCodeSet = true;
-        }
-
-        /// <summary>
-        /// Each card is a nibble 1-13.
-        /// This stores up to 16 cards in a long int.
-        /// </summary>
-        private void SetHandBinary()
-        {
-            handBinary = 0;
-
-            foreach (byte card in hand)
-            {
-                handBinary <<= 4;
-                handBinary |= card;
-            }
         }
 
         /// <summary>

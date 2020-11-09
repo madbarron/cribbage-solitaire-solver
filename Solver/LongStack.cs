@@ -60,9 +60,14 @@ namespace CribbageSolitaireSolver
             return count;
         }
 
+        public static byte ElementAt(ulong stack, byte index)
+        {
+            return (byte)((stack >> index * EL_SIZE) & MASK);
+        }
+
         public static byte ElementAt(ulong stack, int index)
         {
-            throw new NotImplementedException();
+            return (byte)((stack >> index * EL_SIZE) & MASK);
         }
     }
 }

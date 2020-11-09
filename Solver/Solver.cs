@@ -6,7 +6,7 @@ namespace CribbageSolitaireSolver
 {
     class Solver
     {
-        private const int MAX_LEVELS = 26;
+        private const int MAX_LEVELS = 32;
         private const byte COLUMN_HEIGHT = 13;
 
         private Dictionary<GameState, GamePlan> bestScores = new Dictionary<GameState, GamePlan>();
@@ -82,8 +82,6 @@ namespace CribbageSolitaireSolver
             state.board[3] = LongStack.Push(state.board[3], 8);
             state.board[3] = LongStack.Push(state.board[3], 7);
 
-            state.hand = new List<byte>();
-
             return state;
         }
 
@@ -108,8 +106,6 @@ namespace CribbageSolitaireSolver
             state.board[3] = LongStack.Push(state.board[3], 12);
             state.board[3] = LongStack.Push(state.board[3], 12);
 
-            state.hand = new List<byte>();
-
             return state;
         }
 
@@ -117,7 +113,6 @@ namespace CribbageSolitaireSolver
         {
             GameState state = new GameState();
 
-            state.hand = new List<byte>();
             state.board = new ulong[4]
             {
                 0, 0, 0, 0
@@ -208,7 +203,7 @@ namespace CribbageSolitaireSolver
             // If no moves were possible, the hand must be cleared
             if (possibleMoves.Count == 0)
             {
-                state.hand.Clear();
+                state.hand = 0;
                 state.SetHashCode();
 
                 if (bestScores.ContainsKey(state))
@@ -229,7 +224,7 @@ namespace CribbageSolitaireSolver
                 // Try move
                 moveState = new GameState(state);
                 moveScore = ScoreMove(state.hand, LongStack.Peek(moveState.board[column]));
-                moveState.hand.Add(LongStack.Peek(moveState.board[column]));
+                moveState.hand = LongStack.Push(moveState.hand, LongStack.Peek(moveState.board[column]));
                 moveState.board[column] = LongStack.Pop(moveState.board[column]);
 
                 // Try all possible future moves
@@ -260,12 +255,13 @@ namespace CribbageSolitaireSolver
         /// <param name="hand"></param>
         /// <param name="card"></param>
         /// <returns></returns>
-        public byte ScoreMove(List<byte> hand, byte card)
+        public byte ScoreMove(ulong hand, byte card)
         {
             byte pts = 0;
+            byte count = LongStack.Count(hand);
 
             // If the first card is a Jack, 2 pts
-            if (hand.Count == 0 && card == 11)
+            if (count == 0 && card == 11)
             {
                 pts += 2;
             }
@@ -283,15 +279,15 @@ namespace CribbageSolitaireSolver
             }
 
             // Set of 2, 3, or 4
-            if (hand.Count >= 1 && hand[hand.Count - 1] == card)
+            if (count >= 1 && LongStack.ElementAt(hand, 0) == card)
             {
                 // Set of at least 2
 
-                if (hand.Count >= 2 && hand[hand.Count - 2] == card)
+                if (count >= 2 && LongStack.ElementAt(hand, 1) == card)
                 {
                     // Set of at least 3
 
-                    if (hand.Count >= 3 && hand[hand.Count - 3] == card)
+                    if (count >= 3 && LongStack.ElementAt(hand, 2) == card)
                     {
                         // Set of 4! Wow!!
                         pts += 12;
@@ -311,7 +307,7 @@ namespace CribbageSolitaireSolver
 
             for (byte run = 7; run >= 3; run--)
             {
-                if (hand.Count >= run - 1 && isARun(hand, hand.Count - run + 1, run - 1, card))
+                if (count >= run - 1 && isARun(hand, run - 1, card))
                 {
                     pts += run;
                     break;
@@ -325,17 +321,17 @@ namespace CribbageSolitaireSolver
         /// Return true if a run is detected using the given substack and new card
         /// </summary>
         /// <param name="hand"></param>
-        /// <param name="index"></param>
         /// <param name="count"></param>
         /// <param name="card"></param>
         /// <returns></returns>
-        private bool isARun(List<byte> hand, int index, int count, byte card)
+        private bool isARun(ulong hand, int count, byte card)
         {
             List<byte> numbers = new List<byte>(count + 1);
 
-            for (int i = index; i < index + count; i++)
+            for (int i = 0; i < count; i++)
             {
-                numbers.Add(hand[i]);
+                numbers.Add(LongStack.Peek(hand));
+                hand = LongStack.Pop(hand);
             }
             numbers.Add(card);
 
@@ -358,13 +354,13 @@ namespace CribbageSolitaireSolver
         /// </summary>
         /// <param name="hand"></param>
         /// <returns></returns>
-        public int SumHand(List<byte> hand)
+        public int SumHand(ulong hand)
         {
             int sum = 0;
 
-            foreach (byte card in hand)
+            for (int i = LongStack.Count(hand) - 1; i >= 0; i--)
             {
-                sum += CardValue(card);
+                sum += CardValue(LongStack.ElementAt(hand, i));
             }
 
             return sum;
@@ -385,10 +381,10 @@ namespace CribbageSolitaireSolver
         {
             Console.WriteLine();
 
-            for (int y = 0; y < 13; y++)
+            for (byte y = 0; y < 13; y++)
             {
                 // Stack
-                Console.Write(state.hand.Count > y ? GetCardName(state.hand[y]).PadLeft(2) : "  ");
+                Console.Write(LongStack.Count(state.hand) > y ? GetCardName(LongStack.ElementAt(state.hand, y)).PadLeft(2) : "  ");
 
                 // Gap
                 Console.Write("  ");
