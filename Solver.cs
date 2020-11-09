@@ -299,8 +299,11 @@ namespace CribbageSolitaireSolver
                         pts += 6;
                     }
                 }
-                // Set of 2
-                pts += 2;
+                else
+                {
+                    // Set of 2
+                    pts += 2;
+                }
             }
 
             for (short run = 7; run >= 3; run--)
