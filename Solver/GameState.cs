@@ -9,7 +9,16 @@ namespace CribbageSolitaireSolver
     class GameState : IEquatable<GameState>
     {
         public static long numEquals = 0;
-        public Stack<byte>[] board;
+
+        // 4 columns of the board, acts like a stack. 4 bits per card. Least significant bits are top card.
+        // Eg. 
+        // A (1)
+        // 5
+        // Q (12)
+        // 0001 0101 1100
+        // 348
+        public ulong[] board;
+
         public List<byte> hand;
         public ulong handBinary;
 
@@ -23,10 +32,10 @@ namespace CribbageSolitaireSolver
 
         public GameState(GameState copyFrom)
         {
-            this.board = new Stack<byte>[4];
+            this.board = new ulong[4];
             for (int i = 0; i < 4; i++)
             {
-                this.board[i] = new Stack<byte>(copyFrom.board[i].Reverse<byte>());
+                this.board[i] = copyFrom.board[i];
             }
 
             this.hand = new List<byte>(copyFrom.hand);
@@ -57,7 +66,7 @@ namespace CribbageSolitaireSolver
         {
             // With a standard deck, the hand can hold up to 13 cards (A A A A 2 2 2 2 3 3 3 3 4)
             // Once the game is dealt, each column has 14 possible states (0-13 cards)
-            hashCode = hand.Count() + board[0].Count * 14 + board[1].Count * 14 * 14 + board[2].Count * 14 * 14 * 14 - board[3].Count * 14 * 14 * 14 * 14;
+            hashCode = hand.Count() + LongStack.Count(board[0]) * 14 + LongStack.Count(board[1]) * 14 * 14 + LongStack.Count(board[2]) * 14 * 14 * 14 - LongStack.Count(board[3]) * 14 * 14 * 14 * 14;
             SetHandBinary();
             hashCodeSet = true;
         }
