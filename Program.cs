@@ -47,7 +47,7 @@ namespace CribbageSolitaireSolver
                 {
                     byte move = plan.moves.Pop();
                     byte card = playState.board[move].Peek();
-                    if (solver.SumStack(playState.hand) + solver.CardValue(card) > 31)
+                    if (solver.SumHand(playState.hand) + solver.CardValue(card) > 31)
                     {
                         playState.hand.Clear();
                         Console.WriteLine("Clear.");
