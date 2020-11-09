@@ -10,6 +10,7 @@ namespace CribbageSolitaireSolver
         public static long numEquals = 0;
         public Stack<byte>[] board;
         public List<byte> hand;
+        public ulong handBinary;
 
         private int hashCode = 0;
         public bool hashCodeSet = false;
@@ -33,6 +34,10 @@ namespace CribbageSolitaireSolver
         /// <summary>
         /// This assumes that the two gamestates are for the same game.
         /// Game states for different board layouts could easily produce false positives.
+        ///
+        /// This also assumes that GetHashCode() for both objects returns the same hash.
+        /// If hashes are the same, assuming a standard deck and 4 columns,
+        /// Then the boards are the same and the hands have the same number of cards.
         /// </summary>
         /// <param name="other"></param>
         /// <returns></returns>
@@ -43,22 +48,8 @@ namespace CribbageSolitaireSolver
                 return false;
             }
 
-            //numEquals++;
-
-            // If hashes are the same, assuming a standard deck and 4 columns,
-            // Then the boards are the same and the hands have the same number of cards.
-
-            // Compare stacks card-by-card
-            for (byte i = 0; i < hand.Count; i++)
-            {
-                long num;
-                if (hand[i] != other.hand[i])
-                {
-                    return false;
-                }
-            }
-
-            return true;
+            // Compare the first 16 cards. (only 13 cards per hand are possible given a standard deck)
+            return handBinary == other.handBinary;
         }
 
         public void SetHashCode()
@@ -66,7 +57,23 @@ namespace CribbageSolitaireSolver
             // With a standard deck, the hand can hold up to 13 cards (A A A A 2 2 2 2 3 3 3 3 4)
             // Once the game is dealt, each column has 14 possible states (0-13 cards)
             hashCode = hand.Count() + board[0].Count * 14 + board[1].Count * 14 * 14 + board[2].Count * 14 * 14 * 14 - board[3].Count * 14 * 14 * 14 * 14;
+            SetHandBinary();
             hashCodeSet = true;
+        }
+
+        /// <summary>
+        /// Each card is a nibble 1-13.
+        /// This stores up to 16 cards in a long int.
+        /// </summary>
+        private void SetHandBinary()
+        {
+            handBinary = 0;
+
+            foreach(byte card in hand)
+            {
+                handBinary <<= 4;
+                handBinary |= card;
+            }
         }
 
         /// <summary>
