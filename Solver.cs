@@ -219,6 +219,15 @@ namespace CribbageSolitaireSolver
             if (possibleMoves.Count == 0)
             {
                 state.hand.Clear();
+                state.SetHashCode();
+
+                if (bestScores.ContainsKey(state))
+                {
+                    cacheHit++;
+                    cacheMiss--;
+                    return bestScores[state];
+                }
+
                 possibleMoves = GetPossibleMoves(state);
             }
 

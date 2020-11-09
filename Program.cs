@@ -7,6 +7,7 @@ namespace CribbageSolitaireSolver
 {
     class GameState: IEquatable<GameState>
     {
+        public static long numEquals = 0;
         public Stack<byte>[] board;
         public List<byte> hand;
 
@@ -42,30 +43,16 @@ namespace CribbageSolitaireSolver
                 return false;
             }
 
-            // Try quick judgement
-            if (other.GetHashCode() != GetHashCode())
-            {
-                return false;
-            }
+            //numEquals++;
 
-            // Compare stacks
-            if (hand.Count != other.hand.Count)
-            {
-                return false;
-            }
+            // If hashes are the same, assuming a standard deck and 4 columns,
+            // Then the boards are the same and the hands have the same number of cards.
 
+            // Compare stacks card-by-card
             for (byte i = 0; i < hand.Count; i++)
             {
+                long num;
                 if (hand[i] != other.hand[i])
-                {
-                    return false;
-                }
-            }
-
-            // Compare boards
-            for (byte col = 0; col < 4; col++)
-            {
-                if (board[col].Count != other.board[col].Count)
                 {
                     return false;
                 }
@@ -76,10 +63,16 @@ namespace CribbageSolitaireSolver
 
         public void SetHashCode()
         {
-            hashCode = hand.Count() + board[0].Count * 8 + board[1].Count * 8 * 13 + board[2].Count * 8 * 13 * 13 - board[3].Count * 8 * 13 * 13 * 13;
+            // With a standard deck, the hand can hold up to 13 cards (A A A A 2 2 2 2 3 3 3 3 4)
+            // Once the game is dealt, each column has 14 possible states (0-13 cards)
+            hashCode = hand.Count() + board[0].Count * 14 + board[1].Count * 14 * 14 + board[2].Count * 14 * 14 * 14 - board[3].Count * 14 * 14 * 14 * 14;
             hashCodeSet = true;
         }
 
+        /// <summary>
+        /// This class assumes that it is not mutated once this method is called.
+        /// </summary>
+        /// <returns></returns>
         public override int GetHashCode()
         {
             if (!hashCodeSet)
@@ -119,6 +112,7 @@ namespace CribbageSolitaireSolver
 
             GamePlan plan = solver.EvaluateGame(state);
 
+            Console.WriteLine(String.Format("Equality was evaluated {0} times.", GameState.numEquals));
             Console.WriteLine(String.Format("Cache hit: {0} / {1} = {2}", solver.cacheHit, solver.cacheHit + solver.cacheMiss, solver.CacheHitRatio));
 
             GameState playState = state;
