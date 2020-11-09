@@ -34,6 +34,7 @@ namespace CribbageSolitaireSolver
             GamePlan plan = solver.EvaluateGame(state);
 
             Console.WriteLine(String.Format("Cache hit: {0} / {1} = {2}", solver.cacheHit, solver.cacheHit + solver.cacheMiss, solver.CacheHitRatio));
+            //Console.WriteLine(String.Format("Dictionary size: {0}", solver.BestScores.Count));
 
             GameState playState = state;
 

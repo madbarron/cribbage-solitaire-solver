@@ -9,11 +9,23 @@ namespace CribbageSolitaireSolver
         private const int MAX_LEVELS = 26;
         private const byte COLUMN_HEIGHT = 13;
 
-        private Dictionary<GameState, GamePlan> bestScores = new Dictionary<GameState, GamePlan>();
+        private Dictionary<GameState, GamePlan> bestScores = new Dictionary<GameState, GamePlan>(2000000);
         public long cacheHit = 0;
         public long cacheMiss = 0;
 
+        private List<byte>[] isRunLists = new List<byte>[5]
+            {
+                new List<byte>(3),
+                new List<byte>(4),
+                new List<byte>(5),
+                new List<byte>(6),
+                new List<byte>(7)
+            };
+            
+
         public float CacheHitRatio { get { return (float)cacheHit / (cacheHit + cacheMiss); } }
+
+        internal Dictionary<GameState, GamePlan> BestScores { get => bestScores; }
 
         GamePlan zeroPlan = new GamePlan { moves = new Stack<byte>(), score = 0, id = -1 };
         readonly Dictionary<char, byte> inputMap = new Dictionary<char, byte>()
@@ -198,25 +210,8 @@ namespace CribbageSolitaireSolver
         /// <returns></returns>
         public GamePlan EvaluateState(GameState state, int levels)
         {
-            if (levels > MAX_LEVELS)
-            {
-                return zeroPlan;
-            }
-
-            // Check for memoization
-            if (bestScores.ContainsKey(state))
-            {
-                cacheHit++;
-                return bestScores[state];
-            }
-            else
-            {
-                cacheMiss++;
-            }
-
             // There is still room in our hand
             // Try each possible move
-            GamePlan bestMove = zeroPlan;
 
             List<byte> possibleMoves = GetPossibleMoves(state);
 
@@ -229,13 +224,23 @@ namespace CribbageSolitaireSolver
                 if (bestScores.ContainsKey(state))
                 {
                     cacheHit++;
-                    cacheMiss--;
                     return bestScores[state];
                 }
 
                 possibleMoves = GetPossibleMoves(state);
             }
+            else
+            {
+                if (bestScores.ContainsKey(state))
+                {
+                    cacheHit++;
+                    return bestScores[state];
+                }
+            }
 
+            cacheMiss++;
+
+            GamePlan bestMove = zeroPlan;
             GameState moveState;
             byte moveScore;
 
@@ -248,7 +253,7 @@ namespace CribbageSolitaireSolver
                 moveState.board[column] = LongStack.Pop(moveState.board[column]);
 
                 // Try all possible future moves
-                GamePlan futurePlan = EvaluateState(moveState, levels + 1);
+                GamePlan futurePlan = (levels == MAX_LEVELS) ? zeroPlan : EvaluateState(moveState, levels + 1);
 
                 // See if it is best so far
                 if (futurePlan.score + moveScore > bestMove.score)
@@ -346,7 +351,8 @@ namespace CribbageSolitaireSolver
         /// <returns></returns>
         private bool isARun(ulong hand, int count, byte card)
         {
-            List<byte> numbers = new List<byte>(count + 1);
+            List<byte> numbers = isRunLists[count - 2];
+            numbers.Clear();
 
             for (int i = 0; i < count; i++)
             {
