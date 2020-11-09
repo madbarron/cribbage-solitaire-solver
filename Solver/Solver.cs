@@ -328,7 +328,7 @@ namespace CribbageSolitaireSolver
         /// <returns></returns>
         private bool isARun(List<byte> hand, int index, int count, byte card)
         {
-            List<byte> numbers = new List<byte>();
+            List<byte> numbers = new List<byte>(count + 1);
 
             for (int i = index; i < index + count; i++)
             {
