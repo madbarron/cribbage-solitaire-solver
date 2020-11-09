@@ -33,7 +33,6 @@ namespace CribbageSolitaireSolver
 
             GamePlan plan = solver.EvaluateGame(state);
 
-            Console.WriteLine(String.Format("Equality was evaluated {0} times.", GameState.numEquals));
             Console.WriteLine(String.Format("Cache hit: {0} / {1} = {2}", solver.cacheHit, solver.cacheHit + solver.cacheMiss, solver.CacheHitRatio));
 
             GameState playState = state;
@@ -53,7 +52,7 @@ namespace CribbageSolitaireSolver
                         Console.WriteLine("Clear.");
                         break;
                     }
-                    short points = solver.ScoreMove(playState.hand, card);
+                    byte points = solver.ScoreMove(playState.hand, card);
                     playState.hand.Add(LongStack.Peek(playState.board[move]));
                     playState.board[move] = LongStack.Pop(playState.board[move]);
 

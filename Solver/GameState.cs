@@ -8,8 +8,6 @@ namespace CribbageSolitaireSolver
 {
     class GameState : IEquatable<GameState>
     {
-        public static long numEquals = 0;
-
         // 4 columns of the board, acts like a stack. 4 bits per card. Least significant bits are top card.
         // Eg. 
         // A (1)

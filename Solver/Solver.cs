@@ -221,11 +221,14 @@ namespace CribbageSolitaireSolver
                 possibleMoves = GetPossibleMoves(state);
             }
 
+            GameState moveState;
+            byte moveScore;
+
             foreach(byte column in possibleMoves)
             {
                 // Try move
-                GameState moveState = new GameState(state);
-                short moveScore = ScoreMove(state.hand, LongStack.Peek(moveState.board[column]));
+                moveState = new GameState(state);
+                moveScore = ScoreMove(state.hand, LongStack.Peek(moveState.board[column]));
                 moveState.hand.Add(LongStack.Peek(moveState.board[column]));
                 moveState.board[column] = LongStack.Pop(moveState.board[column]);
 
@@ -257,9 +260,9 @@ namespace CribbageSolitaireSolver
         /// <param name="hand"></param>
         /// <param name="card"></param>
         /// <returns></returns>
-        public short ScoreMove(List<byte> hand, byte card)
+        public byte ScoreMove(List<byte> hand, byte card)
         {
-            short pts = 0;
+            byte pts = 0;
 
             // If the first card is a Jack, 2 pts
             if (hand.Count == 0 && card == 11)
@@ -306,11 +309,11 @@ namespace CribbageSolitaireSolver
                 }
             }
 
-            for (short run = 7; run >= 3; run--)
+            for (byte run = 7; run >= 3; run--)
             {
                 if (hand.Count >= run - 1 && isARun(hand, hand.Count - run + 1, run - 1, card))
                 {
-                    pts += (short)(run);
+                    pts += run;
                     break;
                 }
             }
