@@ -6,7 +6,7 @@ namespace CribbageSolitaireSolver
 {
     class Solver
     {
-        private const int MAX_LEVELS = 26;
+        private const int MAX_LEVELS = 28;
         private const byte COLUMN_HEIGHT = 13;
 
         private Dictionary<GameState, GamePlan> bestScores = new Dictionary<GameState, GamePlan>(2000000);
@@ -21,7 +21,8 @@ namespace CribbageSolitaireSolver
                 new List<byte>(6),
                 new List<byte>(7)
             };
-            
+
+        private ulong[] board;
 
         public float CacheHitRatio { get { return (float)cacheHit / (cacheHit + cacheMiss); } }
 
@@ -53,66 +54,67 @@ namespace CribbageSolitaireSolver
         public GameState GetBenchmarkState()
         {
             GameState state = new GameState();
-            state.board = new ulong[4]
+            
+            board = new ulong[4]
             {
                 0, 0, 0, 0
             };
 
-            state.board[0] = LongStack.Push(state.board[0], 13);
-            state.board[0] = LongStack.Push(state.board[0], 6);
-            state.board[0] = LongStack.Push(state.board[0], 3);
-            state.board[0] = LongStack.Push(state.board[0], 2);
-            state.board[0] = LongStack.Push(state.board[0], 8);
-            state.board[0] = LongStack.Push(state.board[0], 8);
-            state.board[0] = LongStack.Push(state.board[0], 1);
-            state.board[0] = LongStack.Push(state.board[0], 11);
-            state.board[0] = LongStack.Push(state.board[0], 12);
-            state.board[0] = LongStack.Push(state.board[0], 5);
-            state.board[0] = LongStack.Push(state.board[0], 10);
-            state.board[0] = LongStack.Push(state.board[0], 12);
-            state.board[0] = LongStack.Push(state.board[0], 10);
+            board[0] = LongStack.Push(board[0], 13);
+            board[0] = LongStack.Push(board[0], 6);
+            board[0] = LongStack.Push(board[0], 3);
+            board[0] = LongStack.Push(board[0], 2);
+            board[0] = LongStack.Push(board[0], 8);
+            board[0] = LongStack.Push(board[0], 8);
+            board[0] = LongStack.Push(board[0], 1);
+            board[0] = LongStack.Push(board[0], 11);
+            board[0] = LongStack.Push(board[0], 12);
+            board[0] = LongStack.Push(board[0], 5);
+            board[0] = LongStack.Push(board[0], 10);
+            board[0] = LongStack.Push(board[0], 12);
+            board[0] = LongStack.Push(board[0], 10);
 
-            state.board[1] = LongStack.Push(state.board[1], 5);
-            state.board[1] = LongStack.Push(state.board[1], 11);
-            state.board[1] = LongStack.Push(state.board[1], 7);
-            state.board[1] = LongStack.Push(state.board[1], 6);
-            state.board[1] = LongStack.Push(state.board[1], 5);
-            state.board[1] = LongStack.Push(state.board[1], 2);
-            state.board[1] = LongStack.Push(state.board[1], 6);
-            state.board[1] = LongStack.Push(state.board[1], 13);
-            state.board[1] = LongStack.Push(state.board[1], 3);
-            state.board[1] = LongStack.Push(state.board[1], 9);
-            state.board[1] = LongStack.Push(state.board[1], 8);
-            state.board[1] = LongStack.Push(state.board[1], 1);
-            state.board[1] = LongStack.Push(state.board[1], 2);
+            board[1] = LongStack.Push(board[1], 5);
+            board[1] = LongStack.Push(board[1], 11);
+            board[1] = LongStack.Push(board[1], 7);
+            board[1] = LongStack.Push(board[1], 6);
+            board[1] = LongStack.Push(board[1], 5);
+            board[1] = LongStack.Push(board[1], 2);
+            board[1] = LongStack.Push(board[1], 6);
+            board[1] = LongStack.Push(board[1], 13);
+            board[1] = LongStack.Push(board[1], 3);
+            board[1] = LongStack.Push(board[1], 9);
+            board[1] = LongStack.Push(board[1], 8);
+            board[1] = LongStack.Push(board[1], 1);
+            board[1] = LongStack.Push(board[1], 2);
 
-            state.board[2] = LongStack.Push(state.board[2], 6);
-            state.board[2] = LongStack.Push(state.board[2], 3);
-            state.board[2] = LongStack.Push(state.board[2], 1);
-            state.board[2] = LongStack.Push(state.board[2], 3);
-            state.board[2] = LongStack.Push(state.board[2], 5);
-            state.board[2] = LongStack.Push(state.board[2], 9);
-            state.board[2] = LongStack.Push(state.board[2], 11);
-            state.board[2] = LongStack.Push(state.board[2], 10);
-            state.board[2] = LongStack.Push(state.board[2], 13);
-            state.board[2] = LongStack.Push(state.board[2], 4);
-            state.board[2] = LongStack.Push(state.board[2], 7);
-            state.board[2] = LongStack.Push(state.board[2], 9);
-            state.board[2] = LongStack.Push(state.board[2], 9);
+            board[2] = LongStack.Push(board[2], 6);
+            board[2] = LongStack.Push(board[2], 3);
+            board[2] = LongStack.Push(board[2], 1);
+            board[2] = LongStack.Push(board[2], 3);
+            board[2] = LongStack.Push(board[2], 5);
+            board[2] = LongStack.Push(board[2], 9);
+            board[2] = LongStack.Push(board[2], 11);
+            board[2] = LongStack.Push(board[2], 10);
+            board[2] = LongStack.Push(board[2], 13);
+            board[2] = LongStack.Push(board[2], 4);
+            board[2] = LongStack.Push(board[2], 7);
+            board[2] = LongStack.Push(board[2], 9);
+            board[2] = LongStack.Push(board[2], 9);
 
-            state.board[3] = LongStack.Push(state.board[3], 4);
-            state.board[3] = LongStack.Push(state.board[3], 7);
-            state.board[3] = LongStack.Push(state.board[3], 12);
-            state.board[3] = LongStack.Push(state.board[3], 12);
-            state.board[3] = LongStack.Push(state.board[3], 2);
-            state.board[3] = LongStack.Push(state.board[3], 1);
-            state.board[3] = LongStack.Push(state.board[3], 13);
-            state.board[3] = LongStack.Push(state.board[3], 7);
-            state.board[3] = LongStack.Push(state.board[3], 10);
-            state.board[3] = LongStack.Push(state.board[3], 4);
-            state.board[3] = LongStack.Push(state.board[3], 8);
-            state.board[3] = LongStack.Push(state.board[3], 4);
-            state.board[3] = LongStack.Push(state.board[3], 11);
+            board[3] = LongStack.Push(board[3], 4);
+            board[3] = LongStack.Push(board[3], 7);
+            board[3] = LongStack.Push(board[3], 12);
+            board[3] = LongStack.Push(board[3], 12);
+            board[3] = LongStack.Push(board[3], 2);
+            board[3] = LongStack.Push(board[3], 1);
+            board[3] = LongStack.Push(board[3], 13);
+            board[3] = LongStack.Push(board[3], 7);
+            board[3] = LongStack.Push(board[3], 10);
+            board[3] = LongStack.Push(board[3], 4);
+            board[3] = LongStack.Push(board[3], 8);
+            board[3] = LongStack.Push(board[3], 4);
+            board[3] = LongStack.Push(board[3], 11);
 
             return state;
         }
@@ -124,19 +126,19 @@ namespace CribbageSolitaireSolver
         public GameState GetTestState()
         {
             GameState state = new GameState();
-            state.board = new ulong[4]
+            board = new ulong[4]
             {
                 0, 0, 0, 0
             };
 
-            state.board[0] = LongStack.Push(state.board[0], 13);
-            state.board[0] = LongStack.Push(state.board[0], 1);
-            state.board[0] = LongStack.Push(state.board[0], 10);
+            board[0] = LongStack.Push(board[0], 13);
+            board[0] = LongStack.Push(board[0], 1);
+            board[0] = LongStack.Push(board[0], 10);
 
-            state.board[1] = LongStack.Push(state.board[1], 10);
+            board[1] = LongStack.Push(board[1], 10);
 
-            state.board[3] = LongStack.Push(state.board[3], 12);
-            state.board[3] = LongStack.Push(state.board[3], 12);
+            board[3] = LongStack.Push(board[3], 12);
+            board[3] = LongStack.Push(board[3], 12);
 
             return state;
         }
@@ -145,7 +147,7 @@ namespace CribbageSolitaireSolver
         {
             GameState state = new GameState();
 
-            state.board = new ulong[4]
+            board = new ulong[4]
             {
                 0, 0, 0, 0
             };
@@ -157,7 +159,7 @@ namespace CribbageSolitaireSolver
                 for(int j = 0; j < COLUMN_HEIGHT; j++)
                 {
                     char input = Console.ReadKey().KeyChar;
-                    state.board[i] = LongStack.Push(state.board[i], inputMap[input]);
+                    board[i] = LongStack.Push(board[i], inputMap[input]);
                 }
 
                 Console.WriteLine();
@@ -187,19 +189,29 @@ namespace CribbageSolitaireSolver
             //return possibleScores[startingState];
         }
 
+        /// <summary>
+        /// Return the list of board columns 0-3 from which a card can be drawn to the current hand
+        /// </summary>
+        /// <param name="state"></param>
+        /// <returns></returns>
         public List<byte> GetPossibleMoves(GameState state)
         {
             List<byte> possibleMoves = new List<byte>();
 
             for (byte column = 0; column < 4; column++)
             {
-                if (LongStack.Count(state.board[column]) > 0 && SumHand(state.hand) + CardValue(LongStack.Peek(state.board[column])) <= 31)
+                if (COLUMN_HEIGHT - state.GetBoardHeight(column) > 0 && SumHand(state.hand) + CardValue(GetCard(column, state)) <= 31)
                 {
                     possibleMoves.Add(column);
                 }
             }
 
             return possibleMoves;
+        }
+
+        public byte GetCard(int columnIndex, GameState state)
+        {
+            return LongStack.ElementAt(board[columnIndex], state.GetBoardHeight(columnIndex));
         }
 
         /// <summary>
@@ -243,14 +255,16 @@ namespace CribbageSolitaireSolver
             GamePlan bestMove = zeroPlan;
             GameState moveState;
             byte moveScore;
+            byte moveCard;
 
             foreach(byte column in possibleMoves)
             {
                 // Try move
                 moveState = new GameState(state);
-                moveScore = ScoreMove(state.hand, LongStack.Peek(moveState.board[column]));
-                moveState.hand = LongStack.Push(moveState.hand, LongStack.Peek(moveState.board[column]));
-                moveState.board[column] = LongStack.Pop(moveState.board[column]);
+                moveCard = GetCard(column, moveState);
+                moveScore = ScoreMove(state.hand, moveCard);
+                moveState.hand = LongStack.Push(moveState.hand, moveCard);
+                moveState.IncrementBoardHeight(column);                
 
                 // Try all possible future moves
                 GamePlan futurePlan = (levels == MAX_LEVELS) ? zeroPlan : EvaluateState(moveState, levels + 1);
@@ -418,7 +432,7 @@ namespace CribbageSolitaireSolver
                 // Columns
                 for (int column = 0; column < 4; column++)
                 {
-                    Console.Write(LongStack.Count(state.board[column]) > y ? GetCardName(LongStack.ElementAt(state.board[column], y)).PadLeft(2) : "  ");
+                    Console.Write(COLUMN_HEIGHT - state.GetBoardHeight(column) > y ? GetCardName(LongStack.ElementAt(board[column], y)).PadLeft(2) : "  ");
                 }
                 Console.Write("\r\n");
             }

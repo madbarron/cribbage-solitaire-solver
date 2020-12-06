@@ -46,7 +46,7 @@ namespace CribbageSolitaireSolver
                 while (plan.moves.Count > 0)
                 {
                     byte move = plan.moves.Pop();
-                    byte card = LongStack.Peek(playState.board[move]);
+                    byte card = solver.GetCard(move, playState);
                     if (solver.SumHand(playState.hand) + solver.CardValue(card) > 31)
                     {
                         playState.hand = 0;
@@ -54,8 +54,8 @@ namespace CribbageSolitaireSolver
                         break;
                     }
                     byte points = solver.ScoreMove(playState.hand, card);
-                    playState.hand = LongStack.Push(playState.hand, LongStack.Peek(playState.board[move]));
-                    playState.board[move] = LongStack.Pop(playState.board[move]);
+                    playState.hand = LongStack.Push(playState.hand, solver.GetCard(move, playState));
+                    playState.IncrementBoardHeight(move);
 
                     Console.WriteLine(String.Format("Take the {0} from column {1}. {2} points.", solver.GetCardName(card), move + 1, points));
                 }

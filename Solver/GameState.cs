@@ -8,16 +8,28 @@ namespace CribbageSolitaireSolver
 {
     class GameState : IEquatable<GameState>
     {
-        // 4 columns of the board, acts like a stack. 4 bits per card. Least significant bits are top card.
+        // 4 values for the height of each board column, each 4 bits of this 16-bit int.
+        // 0 means the column is full (0 cards taken)
+        // 13 means the column is empty
+        public uint boardHeights;
+
+        private static uint boardHeightsMask = 15;
+        private static uint boardHeightsTotalMask = uint.MaxValue;
+        private uint[] deleteMasks = new uint[4]
+        {
+            65535 - 15,
+            65535 - 255 + 15,
+            65535 - 4095 + 255,
+            4095
+        };
+
+        // Acts like a stack. 4 bits per card. Least significant bits are top card.
         // Eg. 
         // A (1)
         // 5
         // Q (12)
         // 0001 0101 1100
         // 348
-        public ulong[] board;
-
-        // Hand also uses the same mechanism as board for storage.
         public ulong hand = 0;
 
         private int hashCode = 0;
@@ -28,14 +40,27 @@ namespace CribbageSolitaireSolver
 
         public GameState(GameState copyFrom)
         {
-            this.board = new ulong[4];
-            for (int i = 0; i < 4; i++)
-            {
-                this.board[i] = copyFrom.board[i];
-            }
-
+            this.boardHeights = copyFrom.boardHeights;
             this.hand = copyFrom.hand;
         }
+
+        public byte GetBoardHeight(int column)
+        {
+            return (byte)((boardHeights >> column * 4) & boardHeightsMask);
+        }
+
+        public void IncrementBoardHeight(int column)
+        {
+            boardHeights = (boardHeights & deleteMasks[column]) | (uint)((GetBoardHeight(column) + 1) << column * 4);
+        }
+
+        // 0110 1010 0011
+        // &
+        // 1111 0000 1111
+        // |
+        // 0000 1011 0000
+        // =
+        // 0110 1011 0011
 
         /// <summary>
         /// This assumes that the two gamestates are for the same game.
@@ -49,19 +74,21 @@ namespace CribbageSolitaireSolver
         /// <returns></returns>
         public bool Equals([AllowNull] GameState other)
         {
-            if (other == null)
-            {
-                return false;
-            }
+            return other != null && hand == other.hand;
 
-            return hand == other.hand;
+            //if (other == null)
+            //{
+            //    return false;
+            //}
+
+            //return hand == other.hand;
         }
 
         public void SetHashCode()
         {
             // With a standard deck, the hand can hold up to 13 cards (A A A A 2 2 2 2 3 3 3 3 4)
             // Once the game is dealt, each column has 14 possible states (0-13 cards)
-            hashCode = LongStack.Count(hand) + LongStack.Count(board[0]) * 14 + LongStack.Count(board[1]) * 14 * 14 + LongStack.Count(board[2]) * 14 * 14 * 14 - LongStack.Count(board[3]) * 14 * 14 * 14 * 14;
+            hashCode = (LongStack.Count(hand) + GetBoardHeight(0) * 14 + GetBoardHeight(1) * 14 * 14 + GetBoardHeight(2) * 14 * 14 * 14 - GetBoardHeight(3) * 14 * 14 * 14 * 14);
             hashCodeSet = true;
         }
 
@@ -71,6 +98,8 @@ namespace CribbageSolitaireSolver
         /// <returns></returns>
         public override int GetHashCode()
         {
+            //return (int)boardHeights;
+
             if (!hashCodeSet)
             {
                 SetHashCode();
