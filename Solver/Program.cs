@@ -27,14 +27,13 @@ namespace CribbageSolitaireSolver
             Solver solver = new Solver();
 
             // Get starting state from keyboard
-            //GameState state = solver.GetStateFromConsole();
-            GameState state = solver.GetBenchmarkState();
+            GameState state = solver.GetStateFromConsole();
+            //GameState state = solver.GetBenchmarkState();
             //GameState state = solver.GetTestState();
 
             GamePlan plan = solver.EvaluateGame(state);
 
             Console.WriteLine(String.Format("Cache hit: {0} / {1} = {2}", solver.cacheHit, solver.cacheHit + solver.cacheMiss, solver.CacheHitRatio));
-            //Console.WriteLine(String.Format("Dictionary size: {0}", solver.BestScores.Count));
 
             GameState playState = state;
 
@@ -69,6 +68,8 @@ namespace CribbageSolitaireSolver
                     Console.Clear();
                 }                
             }
+
+            Console.ReadLine();
         }
     }
 }

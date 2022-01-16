@@ -6,13 +6,16 @@ namespace CribbageSolitaireSolver
 {
     class Solver
     {
-        private const int MAX_LEVELS = 28;
+        private const int MAX_LEVELS = 52;
         private const byte COLUMN_HEIGHT = 13;
 
-        private Dictionary<GameState, GamePlan> bestScores = new Dictionary<GameState, GamePlan>(2000000);
+        // Transposition table: store best plan for any given game state
+        private Dictionary<GameState, GamePlan> bestScores = new Dictionary<GameState, GamePlan>(20000000);
+
         public long cacheHit = 0;
         public long cacheMiss = 0;
 
+        // Lists preallocated for checking whether a set of cards is a run or not
         private List<byte>[] isRunLists = new List<byte>[5]
             {
                 new List<byte>(3),
@@ -22,13 +25,19 @@ namespace CribbageSolitaireSolver
                 new List<byte>(7)
             };
 
+        // Each ulong is a stack of cards. 4 in a board.
         private ulong[] board;
 
         public float CacheHitRatio { get { return (float)cacheHit / (cacheHit + cacheMiss); } }
 
         internal Dictionary<GameState, GamePlan> BestScores { get => bestScores; }
 
+        // Null gameplan
         GamePlan zeroPlan = new GamePlan { moves = new Stack<byte>(), score = 0, id = -1 };
+
+        // Translate between user input and card values.
+        // 1 => Ace, 11 => Jack, 12 => Queen, 13 => King
+        // Note that '1' maps to 10 and not Ace
         readonly Dictionary<char, byte> inputMap = new Dictionary<char, byte>()
         {
             {'a', 1 },
@@ -51,6 +60,10 @@ namespace CribbageSolitaireSolver
             {'f', 13 },
         };
 
+        /// <summary>
+        /// Provides a sample state if you don't want to type one out every time
+        /// </summary>
+        /// <returns>Starting GameState for evaluation</returns>
         public GameState GetBenchmarkState()
         {
             GameState state = new GameState();
@@ -143,14 +156,22 @@ namespace CribbageSolitaireSolver
             return state;
         }
 
+        /// <summary>
+        /// Prompt the user for input
+        /// </summary>
+        /// <returns>GameState representing the beginning of the game</returns>
         public GameState GetStateFromConsole()
         {
             GameState state = new GameState();
 
+            // Board with four columns
             board = new ulong[4]
             {
                 0, 0, 0, 0
             };
+
+            Console.WriteLine("Key: Ace 2 3 4 5 6 7 8 9 10 Jack Queen King");
+            Console.WriteLine("     a   2 3 4 5 6 7 8 9 1  j/s  q/d   k/f");
 
             for (int i = 0; i < 4; i++)
             {
@@ -158,7 +179,7 @@ namespace CribbageSolitaireSolver
 
                 for(int j = 0; j < COLUMN_HEIGHT; j++)
                 {
-                    char input = Console.ReadKey().KeyChar;
+                    char input = Char.ToLower(Console.ReadKey().KeyChar);
                     board[i] = LongStack.Push(board[i], inputMap[input]);
                 }
 
@@ -173,20 +194,13 @@ namespace CribbageSolitaireSolver
         public GamePlan EvaluateGame(GameState startingState)
         {
             // Make sure we are not using cache that did not look as far ahead as we want to.
-            bestScores.Clear();
+            if (MAX_LEVELS < 52)
+            {
+                bestScores.Clear();
+            }
 
             // Find and enqueue possible moves
             return EvaluateState(startingState, 0);
-
-            // Evaluate all moves until the queue is empty
-            //while (evaluationQueue.Count > 0)
-            //{
-            //    GameMove move = evaluationQueue.Dequeue();
-            //    EvaluateMove(move);
-            //}
-
-            // Find best game plan (using memoization)
-            //return possibleScores[startingState];
         }
 
         /// <summary>
@@ -209,6 +223,12 @@ namespace CribbageSolitaireSolver
             return possibleMoves;
         }
 
+        /// <summary>
+        /// Gets the available card for the given column in the given state
+        /// </summary>
+        /// <param name="columnIndex"></param>
+        /// <param name="state"></param>
+        /// <returns></returns>
         public byte GetCard(int columnIndex, GameState state)
         {
             return LongStack.ElementAt(board[columnIndex], state.GetBoardHeight(columnIndex));
@@ -344,6 +364,7 @@ namespace CribbageSolitaireSolver
                 }
             }
 
+            // Check for a run, longest possible first
             for (byte run = 7; run >= 3; run--)
             {
                 if (count >= run - 1 && isARun(hand, run - 1, card))

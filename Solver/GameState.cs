@@ -14,7 +14,6 @@ namespace CribbageSolitaireSolver
         public uint boardHeights;
 
         private static uint boardHeightsMask = 15;
-        private static uint boardHeightsTotalMask = uint.MaxValue;
         private uint[] deleteMasks = new uint[4]
         {
             65535 - 15,
@@ -75,13 +74,6 @@ namespace CribbageSolitaireSolver
         public bool Equals([AllowNull] GameState other)
         {
             return other != null && hand == other.hand;
-
-            //if (other == null)
-            //{
-            //    return false;
-            //}
-
-            //return hand == other.hand;
         }
 
         public void SetHashCode()
@@ -98,8 +90,6 @@ namespace CribbageSolitaireSolver
         /// <returns></returns>
         public override int GetHashCode()
         {
-            //return (int)boardHeights;
-
             if (!hashCodeSet)
             {
                 SetHashCode();
